@@ -3,22 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Been Tracker - World Map</title>
+    <title>Been Tracker - Country List</title>
     <link rel="stylesheet" href="styles.css" />
-    <script src="https://www.gstatic.com/charts/loader.js"></script>
   </head>
   <body>
     <div class="bg-shape bg-shape-1" aria-hidden="true"></div>
     <div class="bg-shape bg-shape-2" aria-hidden="true"></div>
 
-    <main class="app-shell map-shell">
+    <main class="app-shell">
       <header class="topbar">
         <div>
           <p class="eyebrow">Travel Log</p>
-          <h1>World Map</h1>
+          <h1>Country List</h1>
         </div>
         <div class="topbar-actions">
-          <a class="ghost-btn" href="list.html">List</a>
+          <a class="ghost-btn" href="index.html">Map</a>
           <button id="clearVisited" class="ghost-btn" type="button">
             Clear
           </button>
@@ -50,19 +49,27 @@
         </div>
       </section>
 
-      <section class="map-card">
-        <p class="map-help">
-          Tap/click a country on the map to mark it as visited.
+      <section class="controls">
+        <label class="sr-only" for="searchInput">Search countries</label>
+        <input
+          id="searchInput"
+          class="search"
+          type="search"
+          placeholder="Search country..."
+          autocomplete="off"
+        />
+        <div class="filters" id="continentFilters"></div>
+      </section>
+
+      <section>
+        <ul id="countryList" class="country-list" aria-live="polite"></ul>
+        <p id="emptyState" class="empty" hidden>
+          No countries match your search.
         </p>
-        <div
-          id="worldMap"
-          class="world-map"
-          aria-label="Interactive world map"
-        ></div>
       </section>
     </main>
 
     <script src="countries.js"></script>
-    <script src="map.js"></script>
+    <script src="app.js"></script>
   </body>
 </html>
