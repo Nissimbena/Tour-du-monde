@@ -1,0 +1,271 @@
+:root {
+  --bg: #f4efe4;
+  --card: #fffaf1;
+  --ink: #1f241f;
+  --muted: #5a625f;
+  --accent: #0b6c8d;
+  --accent-soft: #cae8f1;
+  --ok: #1f8f55;
+  --ok-soft: #d3f0e0;
+  --border: #d8d0bf;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Space Grotesk", sans-serif;
+  color: var(--ink);
+  background: radial-gradient(
+    circle at 15% 20%,
+    #f8f3e9 0,
+    #f4efe4 45%,
+    #ece4d4 100%
+  );
+  min-height: 100vh;
+}
+
+.bg-shape {
+  position: fixed;
+  border-radius: 999px;
+  filter: blur(8px);
+  z-index: -1;
+}
+
+.bg-shape-1 {
+  width: 220px;
+  height: 220px;
+  right: -60px;
+  top: 20px;
+  background: linear-gradient(135deg, #89d0e5, #d9f1f8);
+}
+
+.bg-shape-2 {
+  width: 180px;
+  height: 180px;
+  left: -50px;
+  bottom: 40px;
+  background: linear-gradient(135deg, #f2c98f, #f8e3c1);
+}
+
+.app-shell {
+  width: min(720px, 100%);
+  margin: 0 auto;
+  padding: 16px 14px 28px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.eyebrow {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+h1 {
+  margin: 2px 0 0;
+  font-size: 28px;
+  line-height: 1.1;
+}
+
+.ghost-btn {
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.stats-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  box-shadow: 0 7px 18px rgba(31, 36, 31, 0.06);
+}
+
+.stat {
+  background: #fff;
+  border: 1px solid #ece5d6;
+  border-radius: 14px;
+  padding: 10px;
+}
+
+.stat-label {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.stat-value {
+  margin: 4px 0 0;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.progress-wrap {
+  grid-column: 1 / -1;
+  background: #fff;
+  border: 1px solid #ece5d6;
+  border-radius: 14px;
+  padding: 10px;
+}
+
+.progress-track {
+  margin-top: 8px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  overflow: hidden;
+}
+
+.progress-fill {
+  width: 0;
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), #0aa3bf);
+  transition: width 220ms ease;
+}
+
+.progress-text {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.controls {
+  margin-top: 16px;
+}
+
+.search {
+  width: 100%;
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 16px;
+  font-family: inherit;
+}
+
+.filters {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin-top: 10px;
+  padding-bottom: 4px;
+}
+
+.filter-btn {
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 999px;
+  padding: 7px 11px;
+  white-space: nowrap;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.filter-btn.active {
+  border-color: var(--accent);
+  background: #e9f6fb;
+  color: #063d50;
+}
+
+.country-list {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+  display: grid;
+  gap: 8px;
+}
+
+.country-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 12px;
+  padding: 11px 12px;
+}
+
+.country-main {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.country-name {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.country-meta {
+  margin: 1px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.visit-btn {
+  border: 1px solid #d9dfdb;
+  background: #f8faf9;
+  border-radius: 999px;
+  padding: 7px 11px;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.visit-btn.visited {
+  border-color: #7bc79e;
+  background: var(--ok-soft);
+  color: #0f5a35;
+}
+
+.empty {
+  color: var(--muted);
+  text-align: center;
+  margin: 18px 0;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+@media (min-width: 768px) {
+  .app-shell {
+    padding: 24px 20px 36px;
+  }
+
+  h1 {
+    font-size: 34px;
+  }
+
+  .country-list {
+    grid-template-columns: 1fr 1fr;
+  }
+}
