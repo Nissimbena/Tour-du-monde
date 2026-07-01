@@ -51,9 +51,14 @@
       </section>
 
       <section class="map-card">
-        <p class="map-help">
-          Tap/click a country on the map to mark it as visited.
-        </p>
+        <div class="map-toolbar">
+          <p class="map-help">Tap a country to mark it visited.</p>
+          <div class="zoom-controls">
+            <button id="zoomOut" class="zoom-btn" type="button" aria-label="Zoom out">&#8722;</button>
+            <span id="zoomLabel" class="zoom-label">World</span>
+            <button id="zoomIn" class="zoom-btn" type="button" aria-label="Zoom in">&#43;</button>
+          </div>
+        </div>
         <div
           id="worldMap"
           class="world-map"
