@@ -16,7 +16,17 @@ MVP of a travel tracker inspired by `been.app`, optimized for mobile web and als
 - Country dataset currently includes `Israel` and does not include `Palestine`, per your request.
 - This is phase 1 (MVP). More features can be added next.
 
-## Run
+## GitHub Pages Setup (One-time)
+
+To make the app live at `https://nissimbena.github.io/Tour-du-monde/`, you need to enable Pages in your repository:
+
+1. Go to: **https://github.com/Nissimbena/Tour-du-monde/settings/pages**
+2. Under **Build and deployment**:
+	- **Source**: Select **GitHub Actions**  
+	- Click **Save**
+3. Wait 1–2 minutes for deployment. The app will then be live!
+
+## Run Locally
 
 Open `index.html` in your browser.
 
