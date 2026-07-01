@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Been Tracker</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-shape bg-shape-1" aria-hidden="true"></div>
+    <div class="bg-shape bg-shape-2" aria-hidden="true"></div>
+
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Travel Log</p>
+          <h1>Been Tracker</h1>
+        </div>
+        <button id="clearVisited" class="ghost-btn" type="button">Clear</button>
+      </header>
+
+      <section class="stats-card" aria-label="Travel stats">
+        <div class="stat">
+          <p class="stat-label">Visited</p>
+          <p class="stat-value" id="visitedCount">0</p>
+        </div>
+        <div class="stat">
+          <p class="stat-label">Countries</p>
+          <p class="stat-value" id="countryCount">0</p>
+        </div>
+        <div class="progress-wrap">
+          <p class="stat-label">World Progress</p>
+          <div
+            class="progress-track"
+            role="progressbar"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="0"
+            id="progressBar"
+          >
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <p class="progress-text" id="progressText">0%</p>
+        </div>
+      </section>
+
+      <section class="controls">
+        <label class="sr-only" for="searchInput">Search countries</label>
+        <input
+          id="searchInput"
+          class="search"
+          type="search"
+          placeholder="Search country..."
+          autocomplete="off"
+        />
+        <div class="filters" id="continentFilters"></div>
+      </section>
+
+      <section>
+        <ul id="countryList" class="country-list" aria-live="polite"></ul>
+        <p id="emptyState" class="empty" hidden>
+          No countries match your search.
+        </p>
+      </section>
+    </main>
+
+    <script src="countries.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
