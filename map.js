@@ -1,22 +1,22 @@
 const STORAGE_KEY = "been-tracker-visited-v1";
 
 const ZOOM_LEVELS = [
-  { label: "World",      region: "world" },
-  { label: "Europe",     region: "150"   },
-  { label: "Asia",       region: "142"   },
-  { label: "Africa",     region: "002"   },
-  { label: "N. America", region: "021"   },
-  { label: "S. America", region: "005"   },
-  { label: "Oceania",    region: "009"   },
+  { label: "World", region: "world" },
+  { label: "Europe", region: "150" },
+  { label: "Asia", region: "142" },
+  { label: "Africa", region: "002" },
+  { label: "N. America", region: "021" },
+  { label: "S. America", region: "005" },
+  { label: "Oceania", region: "009" },
 ];
 
 const CONTINENT_TO_ZOOM = {
-  Europe:         1,
-  Asia:           2,
-  Africa:         3,
+  Europe: 1,
+  Asia: 2,
+  Africa: 3,
   "North America": 4,
   "South America": 5,
-  Oceania:        6,
+  Oceania: 6,
 };
 
 const state = {
@@ -30,9 +30,11 @@ const progressFillEl = document.getElementById("progressFill");
 const progressTextEl = document.getElementById("progressText");
 const progressBarEl = document.getElementById("progressBar");
 const clearVisitedEl = document.getElementById("clearVisited");
-const zoomInEl  = document.getElementById("zoomIn");
+const zoomInEl = document.getElementById("zoomIn");
 const zoomOutEl = document.getElementById("zoomOut");
 const zoomLabelEl = document.getElementById("zoomLabel");
+
+let chart = null;
 
 const chartNameByCanonical = {
   Czechia: "Czech Republic",
@@ -54,6 +56,34 @@ google.charts.load("current", {
 google.charts.setOnLoadCallback(init);
 
 function init() {
+  const container = document.getElementById("worldMap");
+  chart = new google.visualization.GeoChart(container);
+
+  google.visualization.events.addListener(chart, "select", () => {
+    const selection = chart.getSelection();
+    if (!selection.length) return;
+    const row = selection[0].row;
+    if (row == null) return;
+
+    const data = buildDataTable();
+    const clickedName = data.getValue(row, 0);
+    const canonical = normalizeChartNameToCanonical(clickedName);
+    if (!COUNTRIES.some((c) => c.name === canonical)) return;
+
+    toggleVisited(canonical);
+
+    if (state.zoomIndex === 0) {
+      const countryObj = COUNTRIES.find((c) => c.name === canonical);
+      if (countryObj && CONTINENT_TO_ZOOM[countryObj.continent] !== undefined) {
+        state.zoomIndex = CONTINENT_TO_ZOOM[countryObj.continent];
+        updateZoomUI();
+      }
+    }
+
+    drawMap();
+    renderStats();
+  });
+
   clearVisitedEl.addEventListener("click", () => {
     state.visited.clear();
     persistVisited();
@@ -77,6 +107,7 @@ function init() {
     }
   });
 
+  updateZoomUI();
   renderStats();
   drawMap();
 
@@ -86,7 +117,7 @@ function init() {
 function updateZoomUI() {
   zoomLabelEl.textContent = ZOOM_LEVELS[state.zoomIndex].label;
   zoomOutEl.disabled = state.zoomIndex === 0;
-  zoomInEl.disabled  = state.zoomIndex === ZOOM_LEVELS.length - 1;
+  zoomInEl.disabled = state.zoomIndex === ZOOM_LEVELS.length - 1;
 }
 
 function loadVisited() {
@@ -141,8 +172,6 @@ function buildDataTable() {
 }
 
 function drawMap() {
-  const container = document.getElementById("worldMap");
-  const chart = new google.visualization.GeoChart(container);
   const data = buildDataTable();
 
   const options = {
@@ -164,37 +193,6 @@ function drawMap() {
     },
     keepAspectRatio: true,
   };
-
-  google.visualization.events.removeAllListeners(chart);
-  google.visualization.events.addListener(chart, "select", () => {
-    const selection = chart.getSelection();
-    if (!selection.length) {
-      return;
-    }
-
-    const row = selection[0].row;
-    if (row == null) {
-      return;
-    }
-
-    const clickedName = data.getValue(row, 0);
-    const canonical = normalizeChartNameToCanonical(clickedName);
-
-    if (!COUNTRIES.some((country) => country.name === canonical)) {
-      return;
-    }
-
-    toggleVisited(canonical);
-
-    const countryObj = COUNTRIES.find((c) => c.name === canonical);
-    if (countryObj && state.zoomIndex === 0 && CONTINENT_TO_ZOOM[countryObj.continent] !== undefined) {
-      state.zoomIndex = CONTINENT_TO_ZOOM[countryObj.continent];
-      updateZoomUI();
-    }
-
-    drawMap();
-    renderStats();
-  });
 
   chart.draw(data, options);
 }
