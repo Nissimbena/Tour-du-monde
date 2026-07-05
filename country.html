@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Been Tracker - Country Guide</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-shape bg-shape-1" aria-hidden="true"></div>
+    <div class="bg-shape bg-shape-2" aria-hidden="true"></div>
+
+    <main class="app-shell country-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Country Guide</p>
+          <h1 id="countryTitle">Country</h1>
+          <p id="countryFlag" class="country-flag">🏳️</p>
+        </div>
+        <div class="topbar-actions">
+          <a class="ghost-btn" href="list.html">Back to List</a>
+          <a class="ghost-btn" href="index.html">Map</a>
+        </div>
+      </header>
+
+      <section class="country-card">
+        <h2>Photos</h2>
+        <div class="country-form-row">
+          <input id="photoUploader" class="photo-upload" type="file" accept="image/*" multiple />
+          <button id="clearPhotos" class="trip-btn" type="button">Clear photos</button>
+        </div>
+        <div id="photoGallery" class="photo-gallery"></div>
+      </section>
+
+      <section class="country-card">
+        <h2>Where I Slept</h2>
+        <p class="country-help">Add links to Airbnb, Booking, hotels, or any stay option.</p>
+        <div id="sleepList" class="link-list"></div>
+        <button id="addSleepLink" class="trip-btn" type="button">Add stay link</button>
+      </section>
+
+      <section class="country-card">
+        <h2>Places & Fun</h2>
+        <p class="country-help">Add Google Maps links to restaurants, bars, attractions, and activities.</p>
+        <div id="funList" class="link-list"></div>
+        <button id="addFunLink" class="trip-btn" type="button">Add place link</button>
+      </section>
+
+      <section class="country-card">
+        <h2>Flights</h2>
+        <p class="country-help">Track airline and ticket price for this destination.</p>
+        <div id="flightList" class="link-list"></div>
+        <button id="addFlight" class="trip-btn" type="button">Add flight</button>
+      </section>
+    </main>
+
+    <script src="countries.js"></script>
+    <script src="country.js"></script>
+  </body>
+</html>

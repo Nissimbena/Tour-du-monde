@@ -308,6 +308,17 @@ h1 {
   padding: 11px 12px;
 }
 
+.country-actions {
+  display: grid;
+  gap: 6px;
+  justify-items: end;
+}
+
+.country-guide-link {
+  text-decoration: none;
+  color: #1f241f;
+}
+
 .country-main {
   display: flex;
   align-items: center;
@@ -390,6 +401,82 @@ h1 {
   color: var(--muted);
 }
 
+.country-shell {
+  width: min(980px, 100%);
+}
+
+.country-card {
+  margin-top: 14px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 12px;
+}
+
+.country-card h2 {
+  margin: 0 0 6px;
+  font-size: 18px;
+}
+
+.country-help {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.country-flag {
+  margin: 4px 0 0;
+  font-size: 30px;
+}
+
+.country-form-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.photo-gallery {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 8px;
+}
+
+.country-photo {
+  width: 100%;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #ddd6c5;
+}
+
+.link-list {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.link-row {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: 1.2fr 1.4fr auto auto;
+  align-items: center;
+}
+
+.link-input {
+  border: 1px solid #ddd6c5;
+  border-radius: 8px;
+  padding: 7px 8px;
+  font-size: 12px;
+  font-family: inherit;
+  background: #fff;
+}
+
+.link-input-small {
+  max-width: 150px;
+}
+
 .country-item.home-country {
   border-color: #e0b44b;
   box-shadow: inset 0 0 0 1px #f4d88c;
@@ -443,5 +530,15 @@ h1 {
 
   .world-map {
     min-height: 460px;
+  }
+}
+
+@media (max-width: 767px) {
+  .link-row {
+    grid-template-columns: 1fr;
+  }
+
+  .country-actions {
+    justify-items: stretch;
   }
 }

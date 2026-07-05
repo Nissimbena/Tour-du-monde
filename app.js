@@ -390,6 +390,9 @@ function renderCountryList() {
     main.appendChild(textWrap);
 
     const isVisited = detail.status === STATUS_VISITED;
+    const actionWrap = document.createElement("div");
+    actionWrap.className = "country-actions";
+
     const button = document.createElement("button");
     button.type = "button";
     button.className = `visit-btn${isVisited ? " visited" : ""}`;
@@ -399,8 +402,16 @@ function renderCountryList() {
       quickToggleVisited(country.name);
     });
 
+    const guideLink = document.createElement("a");
+    guideLink.className = "trip-btn country-guide-link";
+    guideLink.href = `country.html?country=${encodeURIComponent(country.name)}`;
+    guideLink.textContent = "Guide";
+
+    actionWrap.appendChild(button);
+    actionWrap.appendChild(guideLink);
+
     item.appendChild(main);
-    item.appendChild(button);
+    item.appendChild(actionWrap);
     countryListEl.appendChild(item);
   }
 }
