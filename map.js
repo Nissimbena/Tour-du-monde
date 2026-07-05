@@ -32,10 +32,8 @@ function init() {
     worldCopyJump: true,
   });
 
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 19,
-    attribution: "&copy; OpenStreetMap contributors",
-  }).addTo(map);
+  // Intentionally no base tiles, so only our country geometry is rendered.
+  // This avoids political boundary lines baked into third-party map tiles.
 
   map.on("zoomend", updateZoomUI);
 
