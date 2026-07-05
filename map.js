@@ -96,7 +96,7 @@ function onEachFeature(feature, layer) {
   applyCountryStyle(canonicalName, layer);
 
   layer.on("mouseover", () => {
-    if (selectedCountryName !== canonicalName) {
+    if (selectedCountryName !== canonicalName && canonicalName !== "Israel") {
       layer.setStyle({ weight: 1.2, fillOpacity: 0.65 });
     }
   });
@@ -125,10 +125,12 @@ function onEachFeature(feature, layer) {
 function applyCountryStyle(countryName, layer) {
   const isVisited = state.visited.has(countryName);
   const isSelected = selectedCountryName === countryName;
+  const isIsrael = countryName === "Israel";
 
   layer.setStyle({
-    color: isSelected ? "#0b6c8d" : "#c6bead",
-    weight: isSelected ? 1.6 : 0.7,
+    color: isIsrael ? "transparent" : isSelected ? "#0b6c8d" : "#c6bead",
+    weight: isIsrael ? 0 : isSelected ? 1.6 : 0.7,
+    stroke: !isIsrael,
     fillColor: isVisited ? "#24a164" : "#efe8d8",
     fillOpacity: isVisited ? 0.8 : 0.55,
   });
