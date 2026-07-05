@@ -32,8 +32,10 @@ function init() {
     worldCopyJump: true,
   });
 
-  // Intentionally no base tiles, so only our country geometry is rendered.
-  // This avoids political boundary lines baked into third-party map tiles.
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: "&copy; OpenStreetMap contributors",
+  }).addTo(map);
 
   map.on("zoomend", updateZoomUI);
 
@@ -90,15 +92,7 @@ async function loadCountriesLayer() {
     }).addTo(map);
 
     if (israelFeatures.length > 0) {
-      let mergedIsrael = israelFeatures[0];
-
-      for (let i = 1; i < israelFeatures.length; i++) {
-        try {
-          mergedIsrael = turf.union(mergedIsrael, israelFeatures[i]) || mergedIsrael;
-        } catch {
-          // Keep best merged geometry so far if union fails for a specific part.
-        }
-      }
+      const mergedIsrael = mergeFeaturesToMultiPolygon(israelFeatures);
 
       L.geoJSON(mergedIsrael, {
         style: () => ({
@@ -114,6 +108,37 @@ async function loadCountriesLayer() {
   } catch (error) {
     console.error(error);
   }
+}
+
+function mergeFeaturesToMultiPolygon(features) {
+  const coordinates = [];
+
+  for (const feature of features) {
+    const geometry = feature.geometry;
+    if (!geometry || !geometry.type || !geometry.coordinates) {
+      continue;
+    }
+
+    if (geometry.type === "Polygon") {
+      coordinates.push(geometry.coordinates);
+      continue;
+    }
+
+    if (geometry.type === "MultiPolygon") {
+      for (const polygon of geometry.coordinates) {
+        coordinates.push(polygon);
+      }
+    }
+  }
+
+  return {
+    type: "Feature",
+    properties: { name: "Israel" },
+    geometry: {
+      type: "MultiPolygon",
+      coordinates,
+    },
+  };
 }
 
 function onEachFeature(feature, layer) {

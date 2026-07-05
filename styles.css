@@ -276,10 +276,6 @@ h1 {
   border: 1px solid #e7e1d2;
 }
 
-.world-map .leaflet-container {
-  background: linear-gradient(180deg, #d9eef7 0%, #cee6f1 100%);
-}
-
 .country-item {
   display: flex;
   align-items: center;
