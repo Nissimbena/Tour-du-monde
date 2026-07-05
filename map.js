@@ -1,5 +1,8 @@
 const STORAGE_KEY = "been-tracker-visited-v1";
 const HOME_STORAGE_KEY = "been-tracker-home-country-v1";
+const DETAILS_STORAGE_KEY = "been-tracker-country-details-v1";
+const STATUS_VISITED = "visited";
+const STATUS_WISHLIST = "wishlist";
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 5;
 const ZOOM_LABELS = ["Far", "World", "Continent", "Country", "City"];
@@ -7,6 +10,7 @@ const ZOOM_LABELS = ["Far", "World", "Continent", "Country", "City"];
 const state = {
   visited: new Set(loadVisited()),
   homeCountry: loadHomeCountry(),
+  details: loadDetails(),
 };
 
 const visitedCountEl = document.getElementById("visitedCount");
@@ -43,7 +47,11 @@ function init() {
 
   clearVisitedEl.addEventListener("click", () => {
     state.visited.clear();
+    for (const countryName of Object.keys(state.details)) {
+      state.details[countryName].status = "none";
+    }
     persistVisited();
+    persistDetails();
     refreshCountryStyles();
     renderStats();
   });
@@ -191,7 +199,9 @@ function onEachFeatureWithName(canonicalName, layer) {
 }
 
 function applyCountryStyle(countryName, layer) {
-  const isVisited = state.visited.has(countryName);
+  const status = state.details[countryName]?.status || "none";
+  const isVisited = status === STATUS_VISITED || state.visited.has(countryName);
+  const isWishlist = status === STATUS_WISHLIST;
   const isSelected = selectedCountryName === countryName;
   const isIsrael = countryName === "Israel";
   const isHome = state.homeCountry === countryName;
@@ -200,7 +210,13 @@ function applyCountryStyle(countryName, layer) {
     color: isIsrael ? "transparent" : isSelected ? "#0b6c8d" : "#c6bead",
     weight: isIsrael ? 0 : isSelected ? 1.6 : 0.7,
     stroke: !isIsrael,
-    fillColor: isHome ? "#e8b04a" : isVisited ? "#24a164" : "#efe8d8",
+    fillColor: isHome
+      ? "#e8b04a"
+      : isVisited
+        ? "#24a164"
+        : isWishlist
+          ? "#4f9ddf"
+          : "#efe8d8",
     fillOpacity: isVisited ? 0.8 : 0.55,
   });
 }
@@ -215,12 +231,16 @@ function refreshCountryStyles() {
 
 function normalizeMapCountryName(rawName) {
   const alias = {
+    Serbia: "Serbia",
+    "Republic of Serbia": "Serbia",
     "Czech Republic": "Czechia",
     "Congo": "Republic of the Congo",
+    "Republic of the Congo": "Republic of the Congo",
     "Democratic Republic of the Congo": "Democratic Republic of the Congo",
+    "Dem. Rep. Congo": "Democratic Republic of the Congo",
+    "United Republic of Tanzania": "Tanzania",
     "Cote d'Ivoire": "Ivory Coast",
     "Côte d'Ivoire": "Ivory Coast",
-    "United Republic of Tanzania": "Tanzania",
     "United States of America": "United States",
     "Russian Federation": "Russia",
     "Korea, Republic of": "South Korea",
@@ -248,14 +268,39 @@ function loadHomeCountry() {
   }
 }
 
+function loadDetails() {
+  try {
+    const raw = localStorage.getItem(DETAILS_STORAGE_KEY);
+    if (!raw) {
+      return {};
+    }
+
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function persistDetails() {
+  localStorage.setItem(DETAILS_STORAGE_KEY, JSON.stringify(state.details));
+}
+
 function toggleVisited(countryName) {
+  if (!state.details[countryName]) {
+    state.details[countryName] = { status: "none", trips: [], targetDate: "", photos: [] };
+  }
+
   if (state.visited.has(countryName)) {
     state.visited.delete(countryName);
+    state.details[countryName].status = "none";
   } else {
     state.visited.add(countryName);
+    state.details[countryName].status = STATUS_VISITED;
   }
 
   persistVisited();
+  persistDetails();
   refreshCountryStyles();
 }
 

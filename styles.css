@@ -337,6 +337,37 @@ h1 {
   flex-wrap: wrap;
 }
 
+.status-select {
+  border: 1px solid #ddd6c5;
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-family: inherit;
+  background: #fff;
+}
+
+.trips-wrap {
+  width: 100%;
+  display: grid;
+  gap: 6px;
+}
+
+.trip-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.trip-btn {
+  border: 1px solid #d9dfdb;
+  background: #f8faf9;
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
 .visit-date {
   border: 1px solid #ddd6c5;
   border-radius: 8px;

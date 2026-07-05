@@ -1,12 +1,15 @@
 const STORAGE_KEY = "been-tracker-visited-v1";
 const DETAILS_STORAGE_KEY = "been-tracker-country-details-v1";
 const HOME_STORAGE_KEY = "been-tracker-home-country-v1";
+const STATUS_NONE = "none";
+const STATUS_VISITED = "visited";
+const STATUS_WISHLIST = "wishlist";
 
 const state = {
   query: "",
   continent: "All",
   visited: new Set(loadVisited()),
-  details: loadDetails(),
+  details: loadDetailsNormalized(),
   homeCountry: loadHomeCountry(),
 };
 
@@ -53,7 +56,56 @@ function init() {
   }
 }
 
-function loadDetails() {
+function createEmptyDetails() {
+  return {
+    status: STATUS_NONE,
+    trips: [],
+    targetDate: "",
+    photos: [],
+  };
+}
+
+function normalizeDetailShape(raw) {
+  const base = createEmptyDetails();
+  if (!raw || typeof raw !== "object") {
+    return base;
+  }
+
+  const detail = { ...base };
+  detail.status = [STATUS_NONE, STATUS_VISITED, STATUS_WISHLIST].includes(raw.status)
+    ? raw.status
+    : STATUS_NONE;
+
+  // Backward compatibility from old single `visitDate` model.
+  if (raw.visitDate && !Array.isArray(raw.trips)) {
+    detail.status = STATUS_VISITED;
+    detail.trips = [{ startDate: raw.visitDate, endDate: raw.visitDate }];
+  }
+
+  if (Array.isArray(raw.trips)) {
+    detail.trips = raw.trips
+      .filter((trip) => trip && typeof trip === "object")
+      .map((trip) => ({
+        startDate: trip.startDate || "",
+        endDate: trip.endDate || "",
+      }));
+  }
+
+  detail.targetDate = typeof raw.targetDate === "string" ? raw.targetDate : "";
+  detail.photos = Array.isArray(raw.photos) ? raw.photos : [];
+
+  if (detail.status === STATUS_NONE) {
+    if (detail.trips.length > 0) {
+      detail.status = STATUS_VISITED;
+    } else if (detail.targetDate) {
+      detail.status = STATUS_WISHLIST;
+    }
+  }
+
+  return detail;
+}
+
+function loadDetailsNormalized() {
   try {
     const raw = localStorage.getItem(DETAILS_STORAGE_KEY);
     if (!raw) {
@@ -65,7 +117,12 @@ function loadDetails() {
       return {};
     }
 
-    return parsed;
+    const normalized = {};
+    for (const country of COUNTRIES) {
+      normalized[country.name] = normalizeDetailShape(parsed[country.name]);
+    }
+
+    return normalized;
   } catch {
     return {};
   }
@@ -185,18 +242,119 @@ function renderCountryList() {
     const extra = document.createElement("div");
     extra.className = "country-extra";
 
-    const dateInput = document.createElement("input");
-    dateInput.type = "date";
-    dateInput.className = "visit-date";
-    dateInput.title = "Visit date";
-    dateInput.value = state.details[country.name]?.visitDate || "";
-    dateInput.addEventListener("change", (event) => {
+    const detail = state.details[country.name] || createEmptyDetails();
+
+    const statusSelect = document.createElement("select");
+    statusSelect.className = "status-select";
+    statusSelect.innerHTML = `
+      <option value="${STATUS_NONE}">No status</option>
+      <option value="${STATUS_VISITED}">Visited</option>
+      <option value="${STATUS_WISHLIST}">Want to visit</option>
+    `;
+    statusSelect.value = detail.status;
+    statusSelect.addEventListener("change", (event) => {
+      const nextStatus = event.target.value;
       if (!state.details[country.name]) {
-        state.details[country.name] = { visitDate: "", photos: [] };
+        state.details[country.name] = createEmptyDetails();
       }
-      state.details[country.name].visitDate = event.target.value;
+
+      state.details[country.name].status = nextStatus;
+      if (nextStatus === STATUS_VISITED) {
+        state.visited.add(country.name);
+      } else {
+        state.visited.delete(country.name);
+      }
+
       persistDetails();
+      persistVisited();
+      renderCountryList();
+      renderStats();
     });
+
+    extra.appendChild(statusSelect);
+
+    if (detail.status === STATUS_VISITED) {
+      const tripsWrap = document.createElement("div");
+      tripsWrap.className = "trips-wrap";
+
+      const trips = detail.trips.length > 0 ? detail.trips : [{ startDate: "", endDate: "" }];
+      if (detail.trips.length === 0) {
+        state.details[country.name] = {
+          ...detail,
+          status: STATUS_VISITED,
+          trips,
+        };
+      }
+
+      trips.forEach((trip, tripIndex) => {
+        const row = document.createElement("div");
+        row.className = "trip-row";
+
+        const startInput = document.createElement("input");
+        startInput.type = "date";
+        startInput.className = "visit-date";
+        startInput.value = trip.startDate || "";
+        startInput.title = "Start date";
+        startInput.addEventListener("change", (event) => {
+          state.details[country.name].trips[tripIndex].startDate = event.target.value;
+          persistDetails();
+        });
+
+        const endInput = document.createElement("input");
+        endInput.type = "date";
+        endInput.className = "visit-date";
+        endInput.value = trip.endDate || "";
+        endInput.title = "End date";
+        endInput.addEventListener("change", (event) => {
+          state.details[country.name].trips[tripIndex].endDate = event.target.value;
+          persistDetails();
+        });
+
+        row.appendChild(startInput);
+        row.appendChild(endInput);
+
+        if (trips.length > 1) {
+          const removeTripBtn = document.createElement("button");
+          removeTripBtn.type = "button";
+          removeTripBtn.className = "trip-btn";
+          removeTripBtn.textContent = "Remove";
+          removeTripBtn.addEventListener("click", () => {
+            state.details[country.name].trips.splice(tripIndex, 1);
+            persistDetails();
+            renderCountryList();
+          });
+          row.appendChild(removeTripBtn);
+        }
+
+        tripsWrap.appendChild(row);
+      });
+
+      const addTripBtn = document.createElement("button");
+      addTripBtn.type = "button";
+      addTripBtn.className = "trip-btn";
+      addTripBtn.textContent = "Add visit";
+      addTripBtn.addEventListener("click", () => {
+        state.details[country.name].trips.push({ startDate: "", endDate: "" });
+        persistDetails();
+        renderCountryList();
+      });
+
+      tripsWrap.appendChild(addTripBtn);
+      extra.appendChild(tripsWrap);
+    }
+
+    if (detail.status === STATUS_WISHLIST) {
+      const targetInput = document.createElement("input");
+      targetInput.type = "date";
+      targetInput.className = "visit-date";
+      targetInput.title = "Target date";
+      targetInput.value = detail.targetDate || "";
+      targetInput.addEventListener("change", (event) => {
+        state.details[country.name].targetDate = event.target.value;
+        persistDetails();
+      });
+      extra.appendChild(targetInput);
+    }
 
     const photoInput = document.createElement("input");
     photoInput.type = "file";
@@ -205,7 +363,7 @@ function renderCountryList() {
     photoInput.multiple = true;
     photoInput.addEventListener("change", (event) => {
       if (!state.details[country.name]) {
-        state.details[country.name] = { visitDate: "", photos: [] };
+        state.details[country.name] = createEmptyDetails();
       }
 
       const files = Array.from(event.target.files || []).map((file) => ({
@@ -221,9 +379,8 @@ function renderCountryList() {
 
     const photoCount = document.createElement("span");
     photoCount.className = "photo-count";
-    photoCount.textContent = `${state.details[country.name]?.photos?.length || 0} photos`;
+    photoCount.textContent = `${detail.photos?.length || 0} photos`;
 
-    extra.appendChild(dateInput);
     extra.appendChild(photoInput);
     extra.appendChild(photoCount);
 
@@ -232,14 +389,14 @@ function renderCountryList() {
     textWrap.appendChild(extra);
     main.appendChild(textWrap);
 
-    const isVisited = state.visited.has(country.name);
+    const isVisited = detail.status === STATUS_VISITED;
     const button = document.createElement("button");
     button.type = "button";
     button.className = `visit-btn${isVisited ? " visited" : ""}`;
-    button.textContent = isVisited ? "Visited" : "Mark";
+    button.textContent = isVisited ? "Visited" : "Mark visited";
 
     button.addEventListener("click", () => {
-      toggleVisited(country.name);
+      quickToggleVisited(country.name);
     });
 
     item.appendChild(main);
@@ -248,14 +405,26 @@ function renderCountryList() {
   }
 }
 
-function toggleVisited(countryName) {
-  if (state.visited.has(countryName)) {
-    state.visited.delete(countryName);
-  } else {
+function quickToggleVisited(countryName) {
+  if (!state.details[countryName]) {
+    state.details[countryName] = createEmptyDetails();
+  }
+
+  const detail = state.details[countryName];
+  const isVisited = detail.status === STATUS_VISITED;
+  detail.status = isVisited ? STATUS_NONE : STATUS_VISITED;
+  if (!isVisited && detail.trips.length === 0) {
+    detail.trips.push({ startDate: "", endDate: "" });
+  }
+
+  if (detail.status === STATUS_VISITED) {
     state.visited.add(countryName);
+  } else {
+    state.visited.delete(countryName);
   }
 
   persistVisited();
+  persistDetails();
   renderCountryList();
   renderStats();
 }
