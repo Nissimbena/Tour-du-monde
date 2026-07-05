@@ -1,9 +1,13 @@
 const STORAGE_KEY = "been-tracker-visited-v1";
+const DETAILS_STORAGE_KEY = "been-tracker-country-details-v1";
+const HOME_STORAGE_KEY = "been-tracker-home-country-v1";
 
 const state = {
   query: "",
   continent: "All",
   visited: new Set(loadVisited()),
+  details: loadDetails(),
+  homeCountry: loadHomeCountry(),
 };
 
 const countryListEl = document.getElementById("countryList");
@@ -16,12 +20,14 @@ const progressTextEl = document.getElementById("progressText");
 const progressBarEl = document.getElementById("progressBar");
 const emptyStateEl = document.getElementById("emptyState");
 const clearVisitedEl = document.getElementById("clearVisited");
+const homeCountrySelectEl = document.getElementById("homeCountrySelect");
 
 const continents = ["All", ...new Set(COUNTRIES.map((c) => c.continent))];
 
 init();
 
 function init() {
+  renderHomeCountrySelect();
   renderContinentFilters();
   renderCountryList();
   renderStats();
@@ -37,6 +43,64 @@ function init() {
     renderCountryList();
     renderStats();
   });
+
+  if (homeCountrySelectEl) {
+    homeCountrySelectEl.addEventListener("change", (event) => {
+      state.homeCountry = event.target.value || "";
+      persistHomeCountry();
+      renderCountryList();
+    });
+  }
+}
+
+function loadDetails() {
+  try {
+    const raw = localStorage.getItem(DETAILS_STORAGE_KEY);
+    if (!raw) {
+      return {};
+    }
+
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") {
+      return {};
+    }
+
+    return parsed;
+  } catch {
+    return {};
+  }
+}
+
+function persistDetails() {
+  localStorage.setItem(DETAILS_STORAGE_KEY, JSON.stringify(state.details));
+}
+
+function loadHomeCountry() {
+  try {
+    return localStorage.getItem(HOME_STORAGE_KEY) || "";
+  } catch {
+    return "";
+  }
+}
+
+function persistHomeCountry() {
+  localStorage.setItem(HOME_STORAGE_KEY, state.homeCountry);
+}
+
+function renderHomeCountrySelect() {
+  if (!homeCountrySelectEl) {
+    return;
+  }
+
+  const countries = [...COUNTRIES].sort((a, b) => a.name.localeCompare(b.name));
+  for (const country of countries) {
+    const option = document.createElement("option");
+    option.value = country.name;
+    option.textContent = country.name;
+    homeCountrySelectEl.appendChild(option);
+  }
+
+  homeCountrySelectEl.value = state.homeCountry;
 }
 
 function loadVisited() {
@@ -101,6 +165,9 @@ function renderCountryList() {
   for (const country of visible) {
     const item = document.createElement("li");
     item.className = "country-item";
+    if (state.homeCountry === country.name) {
+      item.classList.add("home-country");
+    }
 
     const main = document.createElement("div");
     main.className = "country-main";
@@ -115,8 +182,54 @@ function renderCountryList() {
     meta.className = "country-meta";
     meta.textContent = country.continent;
 
+    const extra = document.createElement("div");
+    extra.className = "country-extra";
+
+    const dateInput = document.createElement("input");
+    dateInput.type = "date";
+    dateInput.className = "visit-date";
+    dateInput.title = "Visit date";
+    dateInput.value = state.details[country.name]?.visitDate || "";
+    dateInput.addEventListener("change", (event) => {
+      if (!state.details[country.name]) {
+        state.details[country.name] = { visitDate: "", photos: [] };
+      }
+      state.details[country.name].visitDate = event.target.value;
+      persistDetails();
+    });
+
+    const photoInput = document.createElement("input");
+    photoInput.type = "file";
+    photoInput.className = "photo-upload";
+    photoInput.accept = "image/*";
+    photoInput.multiple = true;
+    photoInput.addEventListener("change", (event) => {
+      if (!state.details[country.name]) {
+        state.details[country.name] = { visitDate: "", photos: [] };
+      }
+
+      const files = Array.from(event.target.files || []).map((file) => ({
+        name: file.name,
+        size: file.size,
+        type: file.type,
+      }));
+
+      state.details[country.name].photos = files;
+      persistDetails();
+      renderCountryList();
+    });
+
+    const photoCount = document.createElement("span");
+    photoCount.className = "photo-count";
+    photoCount.textContent = `${state.details[country.name]?.photos?.length || 0} photos`;
+
+    extra.appendChild(dateInput);
+    extra.appendChild(photoInput);
+    extra.appendChild(photoCount);
+
     textWrap.appendChild(name);
     textWrap.appendChild(meta);
+    textWrap.appendChild(extra);
     main.appendChild(textWrap);
 
     const isVisited = state.visited.has(country.name);

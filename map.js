@@ -1,10 +1,12 @@
 const STORAGE_KEY = "been-tracker-visited-v1";
+const HOME_STORAGE_KEY = "been-tracker-home-country-v1";
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 5;
 const ZOOM_LABELS = ["Far", "World", "Continent", "Country", "City"];
 
 const state = {
   visited: new Set(loadVisited()),
+  homeCountry: loadHomeCountry(),
 };
 
 const visitedCountEl = document.getElementById("visitedCount");
@@ -81,15 +83,18 @@ async function loadCountriesLayer() {
       }
     }
 
-    L.geoJSON({ type: "FeatureCollection", features: regularFeatures }, {
-      style: () => ({
-        color: "#c6bead",
-        weight: 0.7,
-        fillColor: "#efe8d8",
-        fillOpacity: 0.55,
-      }),
-      onEachFeature,
-    }).addTo(map);
+    L.geoJSON(
+      { type: "FeatureCollection", features: regularFeatures },
+      {
+        style: () => ({
+          color: "#c6bead",
+          weight: 0.7,
+          fillColor: "#efe8d8",
+          fillOpacity: 0.55,
+        }),
+        onEachFeature,
+      },
+    ).addTo(map);
 
     if (israelFeatures.length > 0) {
       const mergedIsrael = mergeFeaturesToMultiPolygon(israelFeatures);
@@ -102,7 +107,8 @@ async function loadCountriesLayer() {
           fillColor: "#efe8d8",
           fillOpacity: 0.55,
         }),
-        onEachFeature: (_feature, layer) => onEachFeatureWithName("Israel", layer),
+        onEachFeature: (_feature, layer) =>
+          onEachFeatureWithName("Israel", layer),
       }).addTo(map);
     }
   } catch (error) {
@@ -151,7 +157,6 @@ function onEachFeature(feature, layer) {
 }
 
 function onEachFeatureWithName(canonicalName, layer) {
-
   if (!countryLayersByName.has(canonicalName)) {
     countryLayersByName.set(canonicalName, []);
   }
@@ -189,12 +194,13 @@ function applyCountryStyle(countryName, layer) {
   const isVisited = state.visited.has(countryName);
   const isSelected = selectedCountryName === countryName;
   const isIsrael = countryName === "Israel";
+  const isHome = state.homeCountry === countryName;
 
   layer.setStyle({
     color: isIsrael ? "transparent" : isSelected ? "#0b6c8d" : "#c6bead",
     weight: isIsrael ? 0 : isSelected ? 1.6 : 0.7,
     stroke: !isIsrael,
-    fillColor: isVisited ? "#24a164" : "#efe8d8",
+    fillColor: isHome ? "#e8b04a" : isVisited ? "#24a164" : "#efe8d8",
     fillOpacity: isVisited ? 0.8 : 0.55,
   });
 }
@@ -209,6 +215,12 @@ function refreshCountryStyles() {
 
 function normalizeMapCountryName(rawName) {
   const alias = {
+    "Czech Republic": "Czechia",
+    "Congo": "Republic of the Congo",
+    "Democratic Republic of the Congo": "Democratic Republic of the Congo",
+    "Cote d'Ivoire": "Ivory Coast",
+    "Côte d'Ivoire": "Ivory Coast",
+    "United Republic of Tanzania": "Tanzania",
     "United States of America": "United States",
     "Russian Federation": "Russia",
     "Korea, Republic of": "South Korea",
@@ -226,6 +238,14 @@ function normalizeMapCountryName(rawName) {
   }
 
   return null;
+}
+
+function loadHomeCountry() {
+  try {
+    return localStorage.getItem(HOME_STORAGE_KEY) || "";
+  } catch {
+    return "";
+  }
 }
 
 function toggleVisited(countryName) {
