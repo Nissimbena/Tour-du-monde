@@ -231,10 +231,13 @@ function renderCountryList() {
 
     const textWrap = document.createElement("div");
 
-    const name = document.createElement("a");
+    const name = document.createElement("button");
     name.className = "country-name country-name-link";
     name.textContent = country.name;
-    name.href = `country.html?country=${encodeURIComponent(country.name)}`;
+    name.type = "button";
+    name.addEventListener("click", () => {
+      window.location.href = `country.html?country=${encodeURIComponent(country.name)}`;
+    });
 
     const meta = document.createElement("p");
     meta.className = "country-meta";
