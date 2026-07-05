@@ -231,9 +231,10 @@ function renderCountryList() {
 
     const textWrap = document.createElement("div");
 
-    const name = document.createElement("p");
-    name.className = "country-name";
+    const name = document.createElement("a");
+    name.className = "country-name country-name-link";
     name.textContent = country.name;
+    name.href = `country.html?country=${encodeURIComponent(country.name)}`;
 
     const meta = document.createElement("p");
     meta.className = "country-meta";
@@ -402,13 +403,7 @@ function renderCountryList() {
       quickToggleVisited(country.name);
     });
 
-    const guideLink = document.createElement("a");
-    guideLink.className = "trip-btn country-guide-link";
-    guideLink.href = `country.html?country=${encodeURIComponent(country.name)}`;
-    guideLink.textContent = "Guide";
-
     actionWrap.appendChild(button);
-    actionWrap.appendChild(guideLink);
 
     item.appendChild(main);
     item.appendChild(actionWrap);
