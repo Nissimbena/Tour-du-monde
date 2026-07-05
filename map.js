@@ -19,7 +19,7 @@ const zoomLabelEl = document.getElementById("zoomLabel");
 
 let map = null;
 let selectedCountryName = null;
-const countryLayerByName = new Map();
+const countryLayersByName = new Map();
 
 init();
 
@@ -89,7 +89,10 @@ function onEachFeature(feature, layer) {
     return;
   }
 
-  countryLayerByName.set(canonicalName, layer);
+  if (!countryLayersByName.has(canonicalName)) {
+    countryLayersByName.set(canonicalName, []);
+  }
+  countryLayersByName.get(canonicalName).push(layer);
   applyCountryStyle(canonicalName, layer);
 
   layer.on("mouseover", () => {
@@ -132,8 +135,10 @@ function applyCountryStyle(countryName, layer) {
 }
 
 function refreshCountryStyles() {
-  for (const [name, layer] of countryLayerByName.entries()) {
-    applyCountryStyle(name, layer);
+  for (const [name, layers] of countryLayersByName.entries()) {
+    for (const layer of layers) {
+      applyCountryStyle(name, layer);
+    }
   }
 }
 
@@ -145,6 +150,9 @@ function normalizeMapCountryName(rawName) {
     "Korea, Democratic People's Republic of": "North Korea",
     Czechia: "Czechia",
     Palestine: "Israel",
+    "State of Palestine": "Israel",
+    "West Bank": "Israel",
+    "Gaza Strip": "Israel",
   };
 
   const mappedName = alias[rawName] || rawName;
