@@ -69,7 +69,19 @@ async function loadCountriesLayer() {
     }
 
     const geojson = await response.json();
-    L.geoJSON(geojson, {
+    const israelFeatures = [];
+    const regularFeatures = [];
+
+    for (const feature of geojson.features) {
+      const canonicalName = normalizeMapCountryName(feature.properties.name);
+      if (canonicalName === "Israel") {
+        israelFeatures.push(feature);
+      } else {
+        regularFeatures.push(feature);
+      }
+    }
+
+    L.geoJSON({ type: "FeatureCollection", features: regularFeatures }, {
       style: () => ({
         color: "#c6bead",
         weight: 0.7,
@@ -78,6 +90,29 @@ async function loadCountriesLayer() {
       }),
       onEachFeature,
     }).addTo(map);
+
+    if (israelFeatures.length > 0) {
+      let mergedIsrael = israelFeatures[0];
+
+      for (let i = 1; i < israelFeatures.length; i++) {
+        try {
+          mergedIsrael = turf.union(mergedIsrael, israelFeatures[i]) || mergedIsrael;
+        } catch {
+          // Keep best merged geometry so far if union fails for a specific part.
+        }
+      }
+
+      L.geoJSON(mergedIsrael, {
+        style: () => ({
+          color: "transparent",
+          weight: 0,
+          stroke: false,
+          fillColor: "#efe8d8",
+          fillOpacity: 0.55,
+        }),
+        onEachFeature: (_feature, layer) => onEachFeatureWithName("Israel", layer),
+      }).addTo(map);
+    }
   } catch (error) {
     console.error(error);
   }
@@ -88,6 +123,11 @@ function onEachFeature(feature, layer) {
   if (!canonicalName) {
     return;
   }
+
+  onEachFeatureWithName(canonicalName, layer);
+}
+
+function onEachFeatureWithName(canonicalName, layer) {
 
   if (!countryLayersByName.has(canonicalName)) {
     countryLayersByName.set(canonicalName, []);
