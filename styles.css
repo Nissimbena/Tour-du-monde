@@ -271,6 +271,9 @@ h1 {
 .world-map {
   width: 100%;
   min-height: 340px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid #e7e1d2;
 }
 
 .country-item {

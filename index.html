@@ -5,7 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Been Tracker - World Map</title>
     <link rel="stylesheet" href="styles.css" />
-    <script src="https://www.gstatic.com/charts/loader.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
   </head>
   <body>
     <div class="bg-shape bg-shape-1" aria-hidden="true"></div>
@@ -52,11 +57,27 @@
 
       <section class="map-card">
         <div class="map-toolbar">
-          <p class="map-help">Tap a country to mark it visited.</p>
+          <p class="map-help">
+            Drag to move, zoom with +/-, and tap a country to mark visited.
+          </p>
           <div class="zoom-controls">
-            <button id="zoomOut" class="zoom-btn" type="button" aria-label="Zoom out">&#8722;</button>
+            <button
+              id="zoomOut"
+              class="zoom-btn"
+              type="button"
+              aria-label="Zoom out"
+            >
+              &#8722;
+            </button>
             <span id="zoomLabel" class="zoom-label">World</span>
-            <button id="zoomIn" class="zoom-btn" type="button" aria-label="Zoom in">&#43;</button>
+            <button
+              id="zoomIn"
+              class="zoom-btn"
+              type="button"
+              aria-label="Zoom in"
+            >
+              &#43;
+            </button>
           </div>
         </div>
         <div
@@ -67,6 +88,11 @@
       </section>
     </main>
 
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
     <script src="countries.js"></script>
     <script src="map.js"></script>
   </body>
